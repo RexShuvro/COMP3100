@@ -1,14 +1,20 @@
 import java.net.*;
+
+import com.sun.tools.javac.Main;
+
 import java.io.*;
 
 class client {
+
+    
     public static void main(String[] args) throws Exception {
+        
         Socket s = new Socket("localhost", 50000);
 
 
         BufferedReader bfr = new BufferedReader(new InputStreamReader(s.getInputStream()));
         DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-        String serverResponse = "";
+        
 
         sendtoServer(dos, "HELO");
         responseCheck(readServer(bfr), "OK");
@@ -18,7 +24,11 @@ class client {
 
         while(true){
             sendtoServer(dos, "REDY");
-            serverResponse = readServer(bfr);
+            jobArray(bfr, dos);
+
+           
+                 
+
 
             sendtoServer(dos, "QUIT");
             if(responseCheck(readServer(bfr), "QUIT")){
@@ -33,7 +43,7 @@ class client {
     }
 
 
-    private static void sendtoServer(DataOutputStream dos, String str) throws IOException {
+    public static void sendtoServer(DataOutputStream dos, String str) throws IOException {
         dos.flush();
         dos.write((str +"\n").getBytes());
 
@@ -45,11 +55,35 @@ class client {
 
         return str;
     }
+ 
+    public static void jobArray(BufferedReader bfr, DataOutputStream dos ) throws IOException {
+        String in = bfr.readLine();
+        
+        String str = in.replaceAll("[^\\d]", " ");
 
+       str = str.trim(); 
+      
+       str = str.replaceAll(" +", " "); 
+
+               
+      String s[] = str.split(" "); 
+      String out[] = new String[s.length]; 
+      
+      for(int i = 0 ; i < s.length ; i++){ 
+      
+           out[i] = (s[i]);        
+           }
+
+       sendtoServer(dos, ("GETS CAPABLE"+" "+out[3]+" "+out[4]+" "+out[5]));
+
+       readServer(bfr);
+
+        
+    }
 
     private static boolean responseCheck(String serverResponse, String expected){
          if (!serverResponse.equals(expected)){
-             System.out.println("");
+             System.out.println("Communication Error");
              System.exit(1);
          }
          return true;
