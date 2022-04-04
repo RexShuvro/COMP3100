@@ -4,10 +4,6 @@ import com.sun.tools.javac.Main;
 
 import java.io.*;
 
-import java.util.ArrayList;
-
-import java.util.Scanner;
-
 class client {
 
     public static void main(String[] args) throws Exception {
@@ -25,27 +21,49 @@ class client {
 
         while (true) {
             sendtoServer(dos, "REDY");
-            jobArray(bfr, dos);
 
-            sendtoServer(dos, "GETS All");
             String serverData = readServer(bfr);
+            if (serverData.equalsIgnoreCase("NONE")) {
+                break;
+            }
+
             String[] data = serverData.split(" ");
+            String command = data[0];
+            int jobNo = Integer.parseInt(data[2]);
+            System.out.println(jobNo);
+            sendtoServer(dos, "GETS All");
+
+            serverData = readServer(bfr);
+            data = serverData.split(" ");
+
             int noServers = Integer.parseInt(data[1]);
 
             sendtoServer(dos, "OK");
-            String[] ans = serverArray(bfr, dos, noServers);
-
-            ;
-            System.out.println("Server name: " + ans[0]);
-            System.out.println("Server number: " + ans[1]);
-
+            int[] count = new int[1];
+            String serverName = serverArray(bfr, dos, noServers, count);
+            System.out.println("serverName " + serverName);
             sendtoServer(dos, "OK");
+            String temp = readServer(bfr);
+            System.out.println("Server says1: " + temp);
 
-            sendtoServer(dos, "QUIT");
-            if (responseCheck(readServer(bfr), "QUIT")) {
-                System.out.println("Program exited successfully");
-                break;
+            int totalServers = count[0];
+            System.out.println("Server no: " + totalServers);
+
+            int serverNo = jobNo % totalServers;
+            if (command.equals("JOBN")) {
+                schd(dos, serverNo, jobNo, serverName);
+
+                responseCheck(readServer(bfr), "OK");
+
             }
+
+        }
+        sendtoServer(dos, "QUIT");
+        if (responseCheck(readServer(bfr), "QUIT")) {
+            System.out.println("Program exited successfully");
+        } else {
+            System.out.println("Program exited unsuccessfully");
+
         }
 
         dos.close();
@@ -55,40 +73,26 @@ class client {
     public static void sendtoServer(DataOutputStream dos, String str) throws IOException {
         dos.flush();
         dos.write((str + "\n").getBytes());
-
+        dos.flush();
     }
 
     private static String readServer(BufferedReader bfr) throws IOException {
         String str = bfr.readLine();
-        System.out.println("Server says: " + str);
+        // System.out.println("Server says: " + str);
 
         return str;
     }
 
-    public static void jobArray(BufferedReader bfr, DataOutputStream dos) throws IOException {
-        String in = bfr.readLine();
-
-        String str = in.replaceAll("[^\\d]", " ");
-
-        str = str.trim();
-
-        str = str.replaceAll(" +", " ");
-
-        String s[] = str.split(" ");
-        String out[] = new String[s.length];
-
-        for (int i = 0; i < s.length; i++) {
-
-            out[i] = (s[i]);
-        }
+    public static void schd(DataOutputStream dos, int serverNo, int jobNo, String serverName) throws IOException {
+        sendtoServer(dos, String.format("SCHD %s %s %d", jobNo, serverName, serverNo));
     }
 
-    public static String[] serverArray(BufferedReader bfr, DataOutputStream dos, int noServers) throws IOException {
+    public static String serverArray(BufferedReader bfr, DataOutputStream dos, int noServers, int[] count)
+            throws IOException {
         String serverName = "";
+        int maxCount = 0;
         int maxCores = -1;
-        int serverno = -2;
 
-        String[] ans = new String[2];
         for (int i = 0; i < noServers; i++) {
             String str = bfr.readLine();
             if (str == null || str.isEmpty()) {
@@ -97,34 +101,19 @@ class client {
             // juju 0 inactive -1 2 4000 16000 0 0
             String[] details = str.split(" ");
 
-            String out[] = new String[details.length];
-
-            for (int k = 0; k < details.length; k++) {
-
-                out[k] = (details[k]);
-            }
-
             int currentCore = Integer.parseInt(details[4]);
             if (currentCore > maxCores) {
                 maxCores = currentCore;
                 serverName = details[0];
+                maxCount = 1;
+            } else if (serverName.equals(details[0])) {
+                maxCount++;
             }
-
-            for (int j = 0; j < out.length; j++) {
-                if (serverName == out[j]) {
-                    serverno++;
-                }
-
-            }
-
         }
 
-        String no = String.valueOf(serverno);
+        count[0] = maxCount;
 
-        ans[0] = serverName;
-        ans[1] = no;
-
-        return ans;
+        return serverName;
 
     }
 
