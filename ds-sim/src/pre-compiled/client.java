@@ -1,7 +1,4 @@
 import java.net.*;
-
-import com.sun.tools.javac.Main;
-
 import java.io.*;
 
 class client {
@@ -43,8 +40,8 @@ class client {
             String serverName = serverArray(bfr, dos, noServers, count);
             System.out.println("serverName " + serverName);
             sendtoServer(dos, "OK");
-            String temp = readServer(bfr);
-            System.out.println("Server says1: " + temp);
+            String tempResponse = readServer(bfr);
+            System.out.println("Server says: " + tempResponse);
 
             int totalServers = count[0];
             System.out.println("Server no: " + totalServers);
@@ -78,7 +75,7 @@ class client {
 
     private static String readServer(BufferedReader bfr) throws IOException {
         String str = bfr.readLine();
-        // System.out.println("Server says: " + str);
+       
 
         return str;
     }
@@ -98,7 +95,7 @@ class client {
             if (str == null || str.isEmpty()) {
                 break;
             }
-            // juju 0 inactive -1 2 4000 16000 0 0
+           
             String[] details = str.split(" ");
 
             int currentCore = Integer.parseInt(details[4]);
