@@ -28,32 +28,34 @@ class client {
             String command = data[0];
             int jobNo = Integer.parseInt(data[2]);
             System.out.println(jobNo);
-            sendtoServer(dos, "GETS All");
-
-            serverData = readServer(bfr);
-            data = serverData.split(" ");
-
-            int noServers = Integer.parseInt(data[1]);
-
-            sendtoServer(dos, "OK");
-            int[] count = new int[1];
-            String serverName = serverArray(bfr, dos, noServers, count);
-            System.out.println("serverName " + serverName);
-            sendtoServer(dos, "OK");
-            String tempResponse = readServer(bfr);
-            System.out.println("Server says: " + tempResponse);
-
-            int totalServers = count[0];
-            System.out.println("Server no: " + totalServers);
-
-            int serverNo = jobNo % totalServers;
             if (command.equals("JOBN")) {
-                schd(dos, serverNo, jobNo, serverName);
+                sendtoServer(dos, "GETS Capable" + " " + data[4] + " " + data[5] + " " + data[6]);
 
-                responseCheck(readServer(bfr), "OK");
+                serverData = readServer(bfr);
+                data = serverData.split(" ");
+
+                int noServers = Integer.parseInt(data[1]);
+
+                sendtoServer(dos, "OK");
+                int[] count = new int[1];
+                String serverName = serverArray(bfr, dos, noServers, count);
+                System.out.println("serverName " + serverName);
+                sendtoServer(dos, "OK");
+                String tempResponse = readServer(bfr);
+                System.out.println("Server says: " + tempResponse);
+
+                int totalServers = count[0];
+                System.out.println("Server no: " + totalServers);
+
+                int serverNo = jobNo % totalServers;
+                if (command.equals("JOBN")) {
+                    schd(dos, serverNo, jobNo, serverName);
+
+                    responseCheck(readServer(bfr), "OK");
+
+                }
 
             }
-
         }
         sendtoServer(dos, "QUIT");
         if (responseCheck(readServer(bfr), "QUIT")) {
@@ -75,7 +77,6 @@ class client {
 
     private static String readServer(BufferedReader bfr) throws IOException {
         String str = bfr.readLine();
-       
 
         return str;
     }
@@ -95,7 +96,7 @@ class client {
             if (str == null || str.isEmpty()) {
                 break;
             }
-           
+
             String[] details = str.split(" ");
 
             int currentCore = Integer.parseInt(details[4]);
@@ -111,7 +112,6 @@ class client {
         count[0] = maxCount;
 
         return serverName;
-
     }
 
     private static boolean responseCheck(String serverResponse, String expected) {

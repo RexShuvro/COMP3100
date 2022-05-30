@@ -1,5 +1,5 @@
 # ds-sim server 14-Feb, 2022 @ MQ - client-server
-# Server-side simulator started with './ds-server -c ./S1DemoConfigs/ds-S1-config00--demo.xml -v brief'
+# Server-side simulator started with './ds-server -c ./S1DemoConfigs/ds-S1-config00--demo.xml -v brief -n'
 # Waiting for connection to port 50000 of IP address 127.0.0.1
 RCVD HELO
 SENT OK
